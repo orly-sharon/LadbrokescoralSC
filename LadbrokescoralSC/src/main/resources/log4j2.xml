@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Properties>
+		<Property name="PROJECT_NAME">LadbrokescoralProject</Property>
+		<Property name="LOGS_DIR">c:/logs</Property>
+		<Property name="DEFAULT_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L -
+			%m%n</Property>
+		<Property name="ROUTING_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L -
+			%m%n</Property>
+		<Property name="MAX_FILE_SIZE">20 MB</Property>
+		<Property name="MAX_NUMBER_OF_FILES">10</Property>
+	</Properties>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout>
+				<Pattern>${DEFAULT_PATTERN}</Pattern>
+			</PatternLayout>
+		</Console>
+		<RollingFile name="ErrorsFile" fileName="${LOGS_DIR}/errors.log"
+			filePattern="${LOGS_DIR}/errors-%i.log" ignoreExceptions="false"
+			append="true">
+			<PatternLayout>
+				<Pattern>${DEFAULT_PATTERN}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="${MAX_FILE_SIZE}" />
+			</Policies>
+			<DefaultRolloverStrategy max="${MAX_NUMBER_OF_FILES}" />
+		</RollingFile>
+		<Routing name="Routing">
+			<Routes pattern="$${ctx:filePath}">
+				<Route>
+					<RollingFile name="${ctx:filePath}" fileName="${LOGS_DIR}/${ctx:filePath}.log"
+						filePattern="${LOGS_DIR}/${ctx:filePath}-history-%i.log"
+						ignoreExceptions="false" append="true">
+						<PatternLayout>
+							<Pattern>${DEFAULT_PATTERN}</Pattern>
+						</PatternLayout>
+						<Policies>
+							<SizeBasedTriggeringPolicy size="${MAX_FILE_SIZE}" />
+						</Policies>
+						<DefaultRolloverStrategy max="${MAX_NUMBER_OF_FILES}" />
+					</RollingFile>
+				</Route>
+				<!-- The log file when requestNumber is not supplied by the ThreadContext -->
+				<Route key="$${ctx:filePath}">
+					<RollingFile name="MainFile" fileName="${LOGS_DIR}/default.log"
+						filePattern="${LOGS_DIR}/default-%i.log" ignoreExceptions="false"
+						append="true">
+						<PatternLayout>
+							<Pattern>${DEFAULT_PATTERN}</Pattern>
+						</PatternLayout>
+						<Policies>
+							<SizeBasedTriggeringPolicy size="${MAX_FILE_SIZE}" />
+						</Policies>
+						<DefaultRolloverStrategy max="${MAX_NUMBER_OF_FILES}" />
+					</RollingFile>
+				</Route>
+			</Routes>
+		</Routing>
+	</Appenders>
+	<Loggers>
+		<Root level="debug" additivity="false">
+			<AppenderRef ref="Console" level="debug" />
+			<AppenderRef ref="ErrorsFile" level="error" />
+			<AppenderRef ref="Routing" level="trace" />
+		</Root>
+	</Loggers>
+</Configuration>
